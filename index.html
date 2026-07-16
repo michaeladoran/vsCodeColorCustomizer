@@ -1,0 +1,1469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VS Code Theme Customizer</title>
+<style>
+  :root {
+    --app-bg: #17181c;
+    --app-panel: #1f2127;
+    --app-panel-2: #24262e;
+    --app-border: #33363f;
+    --app-text: #d7d9de;
+    --app-text-dim: #8b8e98;
+    --app-accent: #4d9fff;
+    --app-accent-hover: #6cb0ff;
+    --app-danger: #e5534b;
+    --radius: 8px;
+    --mono: "Cascadia Code", Consolas, "Courier New", monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: var(--app-bg);
+    color: var(--app-text);
+    font-family: "Segoe UI", system-ui, sans-serif;
+    font-size: 14px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ---------- Header ---------- */
+  header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    background: var(--app-panel);
+    border-bottom: 1px solid var(--app-border);
+    flex: 0 0 auto;
+  }
+  header h1 { font-size: 16px; font-weight: 600; }
+  header .sub { color: var(--app-text-dim); font-size: 12px; }
+  header .spacer { flex: 1; }
+  button {
+    background: var(--app-panel-2);
+    color: var(--app-text);
+    border: 1px solid var(--app-border);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-family: inherit;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  button:hover { border-color: var(--app-accent); }
+  button.primary { background: var(--app-accent); border-color: var(--app-accent); color: #fff; font-weight: 600; }
+  button.primary:hover { background: var(--app-accent-hover); }
+  button.small { padding: 3px 8px; font-size: 12px; }
+  button.danger:hover { border-color: var(--app-danger); color: var(--app-danger); }
+
+  /* ---------- Layout ---------- */
+  main { display: flex; flex: 1 1 auto; min-height: 0; }
+
+  /* ---------- Sidebar controls ---------- */
+  #controls {
+    width: 330px;
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    background: var(--app-panel);
+    border-right: 1px solid var(--app-border);
+    min-height: 0;
+  }
+  #tabbar {
+    display: flex;
+    gap: 4px;
+    margin: 10px;
+    padding: 4px;
+    background: var(--app-bg);
+    border: 1px solid var(--app-border);
+    border-radius: 8px;
+    flex: 0 0 auto;
+  }
+  #tabbar .tab {
+    flex: 1;
+    border: none;
+    background: transparent;
+    color: var(--app-text-dim);
+    padding: 6px 0;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 13px;
+  }
+  #tabbar .tab:hover { color: var(--app-text); }
+  #tabbar .tab.active { background: var(--app-accent); color: #fff; }
+  .tabpane {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: 0 10px 12px;
+    min-height: 0;
+  }
+  .tabpane.hidden { display: none; }
+  .pane-hint { color: var(--app-text-dim); font-size: 12px; padding: 2px 4px 10px; }
+
+  #controls details {
+    margin-bottom: 8px;
+    background: var(--app-panel-2);
+    border: 1px solid var(--app-border);
+    border-radius: var(--radius);
+  }
+  #controls summary {
+    cursor: pointer;
+    padding: 9px 12px;
+    font-weight: 600;
+    font-size: 13px;
+    user-select: none;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  #controls summary::before { content: "▸"; color: var(--app-text-dim); font-size: 11px; transition: transform .15s; }
+  #controls details[open] summary::before { transform: rotate(90deg); }
+  summary .dots { margin-left: auto; display: flex; gap: 4px; }
+  summary .dots span {
+    width: 11px; height: 11px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,.14);
+  }
+  .section-body { padding: 2px 12px 10px; }
+
+  .color-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 3px 0;
+  }
+  .color-row label {
+    flex: 1;
+    font-size: 13px;
+    color: var(--app-text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .swatch {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 3px 9px 3px 4px;
+    background: var(--app-bg);
+    border: 1px solid var(--app-border);
+    border-radius: 6px;
+    cursor: pointer;
+    flex: 0 0 auto;
+  }
+  .swatch:hover { border-color: var(--app-accent); }
+  .swatch .chip {
+    width: 22px; height: 22px;
+    border-radius: 4px;
+    border: 1px solid rgba(255,255,255,.15);
+  }
+  .swatch .hex {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--app-text-dim);
+  }
+  .style-toggles { display: flex; gap: 3px; flex: 0 0 auto; }
+  .style-toggles button {
+    width: 24px; height: 26px; padding: 0;
+    font-size: 12px;
+    color: var(--app-text-dim);
+  }
+  .style-toggles button.on { color: #fff; background: var(--app-accent); border-color: var(--app-accent); }
+  .style-toggles .bold-btn { font-weight: 700; }
+  .style-toggles .italic-btn { font-style: italic; font-family: Georgia, serif; }
+
+  /* Presets */
+  .preset-row { display: flex; gap: 6px; margin-bottom: 8px; }
+  .preset-row input {
+    flex: 1;
+    background: var(--app-bg);
+    color: var(--app-text);
+    border: 1px solid var(--app-border);
+    border-radius: 5px;
+    padding: 5px 8px;
+    font-size: 13px;
+    min-width: 0;
+  }
+  .preset-row input:focus { outline: none; border-color: var(--app-accent); }
+  #preset-list { display: flex; flex-direction: column; gap: 4px; }
+  .preset-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 6px;
+    border-radius: 5px;
+    background: var(--app-bg);
+    border: 1px solid var(--app-border);
+  }
+  .preset-item .name { flex: 1; font-size: 12.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .preset-empty { color: var(--app-text-dim); font-size: 12px; padding: 2px 4px; }
+
+  /* ---------- Custom color picker popover ---------- */
+  #picker {
+    position: fixed;
+    z-index: 100;
+    width: 244px;
+    background: var(--app-panel);
+    border: 1px solid var(--app-border);
+    border-radius: 10px;
+    box-shadow: 0 12px 36px rgba(0,0,0,.55);
+    padding: 12px;
+  }
+  .pk-sv {
+    position: relative;
+    height: 140px;
+    border-radius: 8px;
+    cursor: crosshair;
+    touch-action: none;
+  }
+  .pk-thumb {
+    position: absolute;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 1.5px rgba(0,0,0,.6);
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+  .pk-hue {
+    position: relative;
+    height: 14px;
+    border-radius: 7px;
+    margin-top: 12px;
+    cursor: pointer;
+    touch-action: none;
+    background: linear-gradient(to right, #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00 100%);
+  }
+  .pk-hue .pk-thumb { top: 50%; }
+  .pk-row { display: flex; gap: 8px; margin-top: 12px; align-items: center; }
+  .pk-preview {
+    width: 30px; height: 30px;
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,.15);
+    flex: 0 0 auto;
+  }
+  .pk-hex {
+    flex: 1;
+    min-width: 0;
+    background: var(--app-bg);
+    border: 1px solid var(--app-border);
+    border-radius: 6px;
+    color: var(--app-text);
+    font-family: var(--mono);
+    font-size: 13px;
+    padding: 6px 8px;
+    text-align: center;
+  }
+  .pk-hex:focus { outline: none; border-color: var(--app-accent); }
+  .pk-hex.invalid { border-color: var(--app-danger); }
+  .pk-eyedrop { width: 30px; height: 30px; padding: 0; display: flex; align-items: center; justify-content: center; flex: 0 0 auto; }
+  .pk-recent { display: flex; gap: 6px; margin-top: 12px; flex-wrap: wrap; }
+  .pk-recent span {
+    width: 20px; height: 20px;
+    border-radius: 5px;
+    border: 1px solid rgba(255,255,255,.15);
+    cursor: pointer;
+  }
+  .pk-recent span:hover { border-color: var(--app-accent); }
+
+  /* ---------- Right column ---------- */
+  #right {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    overflow-y: auto;
+    padding: 14px;
+    gap: 14px;
+  }
+
+  /* ---------- VS Code preview mockup ---------- */
+  #preview {
+    border: 1px solid var(--app-border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    flex: 0 0 auto;
+    box-shadow: 0 6px 24px rgba(0,0,0,.35);
+    font-family: "Segoe UI", sans-serif;
+    user-select: none;
+  }
+  .pv-titlebar {
+    background: var(--titleBar-activeBackground);
+    color: var(--titleBar-activeForeground);
+    display: flex;
+    align-items: center;
+    font-size: 12px;
+    height: 30px;
+    padding: 0 8px;
+  }
+  .pv-menus { display: flex; gap: 2px; }
+  .pv-menus span { padding: 2px 7px; border-radius: 4px; }
+  .pv-title { flex: 1; text-align: center; opacity: .9; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; padding: 0 10px; }
+  .pv-winbtns { display: flex; gap: 4px; font-size: 13px; }
+  .pv-winbtns span { width: 28px; text-align: center; opacity: .8; }
+
+  .pv-body { display: flex; height: 380px; }
+
+  .pv-activitybar {
+    width: 46px;
+    flex: 0 0 auto;
+    background: var(--activityBar-background);
+    color: var(--activityBar-foreground);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 6px 0;
+    gap: 4px;
+  }
+  .pv-activitybar .icon {
+    width: 46px; height: 40px;
+    display: flex; align-items: center; justify-content: center;
+    opacity: .55;
+    position: relative;
+  }
+  .pv-activitybar .icon.active { opacity: 1; box-shadow: inset 2px 0 0 var(--activityBar-foreground); }
+  .pv-activitybar .icon svg { width: 22px; height: 22px; }
+  .pv-activitybar .grow { flex: 1; }
+  .pv-badge {
+    position: absolute;
+    right: 6px; bottom: 4px;
+    background: var(--activityBarBadge-background);
+    color: #fff;
+    border-radius: 8px;
+    font-size: 9px;
+    line-height: 1;
+    padding: 2px 4px;
+    font-weight: 600;
+  }
+
+  .pv-sidebar {
+    width: 168px;
+    flex: 0 0 auto;
+    background: var(--sideBar-background);
+    color: var(--sideBar-foreground);
+    font-size: 12px;
+    overflow: hidden;
+  }
+  .pv-sidebar .sb-title { padding: 8px 14px 6px; font-size: 10.5px; letter-spacing: .5px; opacity: .8; }
+  .pv-sidebar .sb-section { padding: 3px 8px; font-weight: 700; font-size: 11px; display: flex; gap: 4px; align-items: center; }
+  .pv-tree { line-height: 21px; }
+  .pv-tree div { padding-left: 22px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pv-tree .folder { padding-left: 12px; }
+  .pv-tree .selected {
+    background: var(--list-activeSelectionBackground);
+    color: var(--list-activeSelectionForeground);
+  }
+
+  .pv-editor-col { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .pv-tabs {
+    background: var(--editorGroupHeader-tabsBackground);
+    display: flex;
+    height: 34px;
+    flex: 0 0 auto;
+    font-size: 12.5px;
+  }
+  .pv-tab {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 12px;
+    border-right: 1px solid rgba(0,0,0,.25);
+  }
+  .pv-tab.active { background: var(--tab-activeBackground); color: var(--tab-activeForeground); }
+  .pv-tab.inactive { background: var(--tab-inactiveBackground); color: var(--tab-inactiveForeground); }
+  .pv-tab .dot { font-size: 15px; line-height: 1; }
+
+  .pv-code {
+    flex: 1;
+    background: var(--editor-background);
+    color: var(--editor-foreground);
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 19px;
+    overflow: auto;
+    padding: 4px 0;
+  }
+  .cl { display: flex; white-space: pre; }
+  .cl .ln {
+    width: 44px;
+    flex: 0 0 auto;
+    text-align: right;
+    padding-right: 16px;
+    color: var(--editorLineNumber-foreground);
+  }
+  .cl.active { background: var(--editor-lineHighlightBackground); }
+  .cl.active .ln { color: var(--editorLineNumber-activeForeground); }
+  .cl .ct { flex: 1; }
+  .sel { background: var(--editor-selectionBackground); }
+  .cursor {
+    display: inline-block;
+    width: 2px; height: 15px;
+    background: var(--editorCursor-foreground);
+    vertical-align: text-bottom;
+    animation: blink 1s steps(1) infinite;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .pv-panel {
+    flex: 0 0 auto;
+    height: 84px;
+    background: var(--panel-background);
+    border-top: 1px solid rgba(128,128,128,.35);
+    font-size: 12px;
+    overflow: hidden;
+  }
+  .pv-panel .panel-tabs {
+    display: flex; gap: 14px;
+    padding: 6px 14px 4px;
+    font-size: 10.5px;
+    letter-spacing: .4px;
+    color: var(--terminal-foreground);
+  }
+  .pv-panel .panel-tabs .on { border-bottom: 1px solid var(--terminal-foreground); }
+  .pv-panel .panel-tabs .off { opacity: .55; }
+  .pv-term {
+    font-family: var(--mono);
+    color: var(--terminal-foreground);
+    padding: 2px 14px;
+    line-height: 18px;
+    white-space: pre;
+  }
+
+  .pv-statusbar {
+    background: var(--statusBar-background);
+    color: var(--statusBar-foreground);
+    display: flex;
+    align-items: center;
+    height: 24px;
+    padding: 0 10px;
+    font-size: 11.5px;
+    gap: 12px;
+  }
+  .pv-statusbar .grow { flex: 1; }
+  .pv-statusbar span { white-space: nowrap; }
+
+  /* ---------- JSON output ---------- */
+  #json-card {
+    background: var(--app-panel);
+    border: 1px solid var(--app-border);
+    border-radius: var(--radius);
+    flex: 0 0 auto;
+  }
+  #json-card .json-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--app-border);
+  }
+  #json-card .json-head h2 { font-size: 14px; font-weight: 600; flex: 1; }
+  #json-card .json-head label { font-size: 12.5px; color: var(--app-text-dim); display: flex; align-items: center; gap: 6px; cursor: pointer; }
+  #json-out {
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.5;
+    padding: 12px 16px;
+    overflow-x: auto;
+    max-height: 340px;
+    overflow-y: auto;
+    color: #ce9178;
+  }
+  #json-out .jk { color: #9cdcfe; }
+  #json-out .jp { color: var(--app-text-dim); }
+  .json-hint { padding: 0 16px 12px; color: var(--app-text-dim); font-size: 12px; }
+
+  /* ---------- Import dialog ---------- */
+  dialog {
+    background: var(--app-panel);
+    color: var(--app-text);
+    border: 1px solid var(--app-border);
+    border-radius: var(--radius);
+    padding: 18px;
+    width: min(620px, 92vw);
+  }
+  dialog::backdrop { background: rgba(0,0,0,.55); }
+  dialog h2 { font-size: 15px; margin-bottom: 6px; }
+  dialog p { font-size: 12.5px; color: var(--app-text-dim); margin-bottom: 10px; }
+  dialog textarea {
+    width: 100%;
+    height: 220px;
+    background: var(--app-bg);
+    color: var(--app-text);
+    border: 1px solid var(--app-border);
+    border-radius: 6px;
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 10px;
+    resize: vertical;
+  }
+  dialog textarea:focus { outline: none; border-color: var(--app-accent); }
+  .dialog-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 12px; }
+  .import-error { color: var(--app-danger); font-size: 12.5px; margin-top: 8px; min-height: 18px; }
+
+  /* Toast */
+  #toast {
+    position: fixed;
+    bottom: 22px; left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--app-accent);
+    color: #fff;
+    padding: 8px 18px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    transition: transform .25s ease;
+    pointer-events: none;
+    z-index: 200;
+  }
+  #toast.show { transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>VS Code Theme Customizer</h1>
+  <span class="sub">tweak colors, watch the preview, paste the JSON into settings.json</span>
+  <span class="spacer"></span>
+  <button id="btn-random" title="Generate a harmonious random palette">🎲 Randomize</button>
+  <button id="btn-reset" title="Restore all Dark+ default colors">↺ Reset to Dark+</button>
+  <button id="btn-import">Import JSON</button>
+</header>
+
+<main>
+  <aside id="controls">
+    <div id="tabbar">
+      <button class="tab active" data-tab="ui">Interface</button>
+      <button class="tab" data-tab="code">Code</button>
+      <button class="tab" data-tab="presets">Presets</button>
+    </div>
+    <div class="tabpane" id="pane-ui">
+      <div class="pane-hint">Colors for the editor chrome. Click a color to edit it.</div>
+    </div>
+    <div class="tabpane hidden" id="pane-code">
+      <div class="pane-hint">Syntax highlighting colors. <b>B</b> / <i>I</i> toggle bold &amp; italic.</div>
+    </div>
+    <div class="tabpane hidden" id="pane-presets">
+      <div class="pane-hint">Save the current theme under a name, or load a saved one.</div>
+      <div class="preset-row">
+        <input type="text" id="preset-name" placeholder="Preset name…" maxlength="40">
+        <button class="small" id="btn-save-preset">Save</button>
+      </div>
+      <div id="preset-list"></div>
+    </div>
+  </aside>
+
+  <section id="right">
+    <div id="preview"></div>
+
+    <div id="json-card">
+      <div class="json-head">
+        <h2>settings.json output</h2>
+        <label><input type="checkbox" id="chk-all"> Include unchanged colors</label>
+        <button class="primary" id="btn-copy">Copy JSON</button>
+      </div>
+      <pre id="json-out"></pre>
+      <div class="json-hint">
+        Paste into your user settings: <b>Ctrl+Shift+P</b> → “Preferences: Open User Settings (JSON)”.
+        If those keys already exist, merge the contents instead of duplicating the keys.
+      </div>
+    </div>
+  </section>
+</main>
+
+<dialog id="import-dialog">
+  <h2>Import existing customizations</h2>
+  <p>Paste your settings.json (or just the <code>workbench.colorCustomizations</code> /
+     <code>editor.tokenColorCustomizations</code> objects). Comments and trailing commas are OK.</p>
+  <textarea id="import-text" spellcheck="false" placeholder='{ "workbench.colorCustomizations": { "statusBar.background": "#ff0066" } }'></textarea>
+  <div class="import-error" id="import-error"></div>
+  <div class="dialog-actions">
+    <button id="btn-import-cancel">Cancel</button>
+    <button class="primary" id="btn-import-apply">Import</button>
+  </div>
+</dialog>
+
+<div id="toast"></div>
+
+<script>
+"use strict";
+
+/* ================= Definitions ================= */
+
+const WORKBENCH = [
+  // Editor
+  { key: "editor.background",                group: "Editor",       label: "Background",            def: "#1e1e1e" },
+  { key: "editor.foreground",                group: "Editor",       label: "Default text",          def: "#d4d4d4" },
+  { key: "editor.lineHighlightBackground",   group: "Editor",       label: "Current line highlight",def: "#282828" },
+  { key: "editor.selectionBackground",       group: "Editor",       label: "Selection",             def: "#264f78" },
+  { key: "editorCursor.foreground",          group: "Editor",       label: "Cursor",                def: "#aeafad" },
+  { key: "editorLineNumber.foreground",      group: "Editor",       label: "Line numbers",          def: "#858585" },
+  { key: "editorLineNumber.activeForeground",group: "Editor",       label: "Active line number",    def: "#c6c6c6" },
+  // Title bar
+  { key: "titleBar.activeBackground",        group: "Title Bar",    label: "Background",            def: "#3c3c3c" },
+  { key: "titleBar.activeForeground",        group: "Title Bar",    label: "Text",                  def: "#cccccc" },
+  // Activity bar
+  { key: "activityBar.background",           group: "Activity Bar", label: "Background",            def: "#333333" },
+  { key: "activityBar.foreground",           group: "Activity Bar", label: "Icons",                 def: "#ffffff" },
+  { key: "activityBarBadge.background",      group: "Activity Bar", label: "Badge",                 def: "#007acc" },
+  // Side bar
+  { key: "sideBar.background",               group: "Side Bar",     label: "Background",            def: "#252526" },
+  { key: "sideBar.foreground",               group: "Side Bar",     label: "Text",                  def: "#cccccc" },
+  { key: "list.activeSelectionBackground",   group: "Side Bar",     label: "Selected item bg",      def: "#094771" },
+  { key: "list.activeSelectionForeground",   group: "Side Bar",     label: "Selected item text",    def: "#ffffff" },
+  // Tabs
+  { key: "editorGroupHeader.tabsBackground", group: "Tabs",         label: "Tab strip background",  def: "#252526" },
+  { key: "tab.activeBackground",             group: "Tabs",         label: "Active tab bg",         def: "#1e1e1e" },
+  { key: "tab.activeForeground",             group: "Tabs",         label: "Active tab text",       def: "#ffffff" },
+  { key: "tab.inactiveBackground",           group: "Tabs",         label: "Inactive tab bg",       def: "#2d2d2d" },
+  { key: "tab.inactiveForeground",           group: "Tabs",         label: "Inactive tab text",     def: "#969696" },
+  // Status bar
+  { key: "statusBar.background",             group: "Status Bar",   label: "Background",            def: "#007acc" },
+  { key: "statusBar.foreground",             group: "Status Bar",   label: "Text",                  def: "#ffffff" },
+  // Panel / terminal
+  { key: "panel.background",                 group: "Panel & Terminal", label: "Panel background",  def: "#1e1e1e" },
+  { key: "terminal.foreground",              group: "Panel & Terminal", label: "Terminal text",     def: "#cccccc" },
+];
+
+const TOKENS = [
+  { id: "comment", label: "Comments",         def: "#6a9955", scopes: ["comment", "punctuation.definition.comment"] },
+  { id: "string",  label: "Strings",          def: "#ce9178", scopes: ["string"] },
+  { id: "number",  label: "Numbers",          def: "#b5cea8", scopes: ["constant.numeric"] },
+  { id: "keyword", label: "Keywords (const, class…)", def: "#569cd6", scopes: ["keyword", "storage.type", "storage.modifier"] },
+  { id: "ctrl",    label: "Control flow (if, return…)", def: "#c586c0", scopes: ["keyword.control"] },
+  { id: "func",    label: "Functions",        def: "#dcdcaa", scopes: ["entity.name.function", "support.function"] },
+  { id: "variable",label: "Variables",        def: "#9cdcfe", scopes: ["variable", "support.variable"] },
+  { id: "prop",    label: "Properties",       def: "#9cdcfe", scopes: ["variable.other.property", "support.type.property-name"] },
+  { id: "type",    label: "Types & classes",  def: "#4ec9b0", scopes: ["entity.name.type", "entity.name.class", "support.type", "support.class"] },
+  { id: "op",      label: "Operators",        def: "#d4d4d4", scopes: ["keyword.operator"] },
+  { id: "const",   label: "Constants (true, null…)", def: "#569cd6", scopes: ["constant.language"] },
+];
+
+// Shorthand keys VS Code accepts inside editor.tokenColorCustomizations
+const SHORTHAND_MAP = {
+  comments: "comment", strings: "string", numbers: "number",
+  keywords: "keyword", functions: "func", variables: "variable", types: "type",
+};
+
+const STORAGE_CURRENT = "vscc.current";
+const STORAGE_PRESETS = "vscc.presets";
+const STORAGE_RECENT  = "vscc.recent";
+
+/* ================= State ================= */
+
+function defaultState() {
+  const s = { colors: {}, tokens: {} };
+  for (const w of WORKBENCH) s.colors[w.key] = w.def;
+  for (const t of TOKENS) s.tokens[t.id] = { color: t.def, italic: false, bold: false };
+  return s;
+}
+let state = defaultState();
+
+/* ================= Helpers ================= */
+
+const $ = (sel) => document.querySelector(sel);
+const clamp = (n, a, b) => Math.min(b, Math.max(a, n));
+
+function normalizeHex(v) {
+  if (typeof v !== "string") return null;
+  let h = v.trim().toLowerCase();
+  if (!h.startsWith("#")) h = "#" + h;
+  if (/^#[0-9a-f]{8}$/.test(h)) h = h.slice(0, 7);          // drop alpha
+  if (/^#[0-9a-f]{4}$/.test(h)) h = h.slice(0, 4);
+  if (/^#[0-9a-f]{3}$/.test(h)) h = "#" + [...h.slice(1)].map(c => c + c).join("");
+  return /^#[0-9a-f]{6}$/.test(h) ? h : null;
+}
+
+function hslToHex(h, s, l) {
+  s /= 100; l /= 100;
+  const k = n => (n + h / 30) % 12;
+  const a = s * Math.min(l, 1 - l);
+  const f = n => {
+    const c = l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+    return Math.round(255 * c).toString(16).padStart(2, "0");
+  };
+  return `#${f(0)}${f(8)}${f(4)}`;
+}
+
+function hexToRgb(hex) {
+  return [parseInt(hex.slice(1, 3), 16), parseInt(hex.slice(3, 5), 16), parseInt(hex.slice(5, 7), 16)];
+}
+
+function rgbToHsv(r, g, b) {
+  r /= 255; g /= 255; b /= 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b), d = max - min;
+  let h = 0;
+  if (d) {
+    if (max === r) h = ((g - b) / d) % 6;
+    else if (max === g) h = (b - r) / d + 2;
+    else h = (r - g) / d + 4;
+    h *= 60;
+    if (h < 0) h += 360;
+  }
+  return [h, max === 0 ? 0 : d / max, max];
+}
+
+function hsvToHex(h, s, v) {
+  const c = v * s;
+  const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+  const m = v - c;
+  let r = 0, g = 0, b = 0;
+  if (h < 60)       { r = c; g = x; }
+  else if (h < 120) { r = x; g = c; }
+  else if (h < 180) { g = c; b = x; }
+  else if (h < 240) { g = x; b = c; }
+  else if (h < 300) { r = x; b = c; }
+  else              { r = c; b = x; }
+  const to = n => Math.round((n + m) * 255).toString(16).padStart(2, "0");
+  return `#${to(r)}${to(g)}${to(b)}`;
+}
+
+function cssVarName(key) { return "--" + key.replace(/\./g, "-"); }
+
+function showToast(msg) {
+  const t = $("#toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(showToast._h);
+  showToast._h = setTimeout(() => t.classList.remove("show"), 1800);
+}
+
+/* ================= Apply state to preview ================= */
+
+function applyState() {
+  const root = document.documentElement;
+  for (const w of WORKBENCH) root.style.setProperty(cssVarName(w.key), state.colors[w.key]);
+  for (const t of TOKENS) {
+    const s = state.tokens[t.id];
+    root.style.setProperty(`--tok-${t.id}`, s.color);
+    root.style.setProperty(`--tok-${t.id}-fs`, s.italic ? "italic" : "normal");
+    root.style.setProperty(`--tok-${t.id}-fw`, s.bold ? "700" : "normal");
+  }
+  renderJson();
+  try { localStorage.setItem(STORAGE_CURRENT, JSON.stringify(state)); } catch (e) {}
+}
+
+/* ================= JSON generation ================= */
+
+function buildOutput(includeAll) {
+  const wb = {};
+  for (const w of WORKBENCH) {
+    const v = state.colors[w.key];
+    if (includeAll || v !== w.def) wb[w.key] = v;
+  }
+  const rules = [];
+  for (const t of TOKENS) {
+    const s = state.tokens[t.id];
+    const changed = s.color !== t.def || s.italic || s.bold;
+    if (includeAll || changed) {
+      const settings = { foreground: s.color };
+      const fs = [s.italic && "italic", s.bold && "bold"].filter(Boolean).join(" ");
+      if (fs) settings.fontStyle = fs;
+      rules.push({ name: t.label, scope: t.scopes, settings });
+    }
+  }
+  const out = {};
+  if (Object.keys(wb).length) out["workbench.colorCustomizations"] = wb;
+  if (rules.length) out["editor.tokenColorCustomizations"] = { textMateRules: rules };
+  return out;
+}
+
+function renderJson() {
+  const out = buildOutput($("#chk-all").checked);
+  const el = $("#json-out");
+  if (!Object.keys(out).length) {
+    el.innerHTML = '<span class="jp">{ }   // no changes from Dark+ yet — tweak a color on the left</span>';
+    return;
+  }
+  const json = JSON.stringify(out, null, 2);
+  el.innerHTML = json
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+    .replace(/"([^"]+)":/g, '<span class="jk">"$1"</span>:')
+    .replace(/([{}\[\],])/g, '<span class="jp">$1</span>');
+}
+
+/* ================= Custom color picker ================= */
+
+const Picker = (() => {
+  let el, svEl, svThumb, hueEl, hueThumb, hexInput, previewEl, recentEl;
+  let h = 0, s = 1, v = 1;
+  let onChange = null;
+  let anchor = null;
+
+  function loadRecent() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_RECENT)) || []; }
+    catch (e) { return []; }
+  }
+  function pushRecent(hex) {
+    let r = loadRecent().filter(x => x !== hex);
+    r.unshift(hex);
+    r = r.slice(0, 8);
+    try { localStorage.setItem(STORAGE_RECENT, JSON.stringify(r)); } catch (e) {}
+  }
+  function renderRecent() {
+    const r = loadRecent();
+    recentEl.innerHTML = "";
+    for (const hex of r) {
+      const chip = document.createElement("span");
+      chip.style.background = hex;
+      chip.title = hex;
+      chip.addEventListener("click", () => { setFromHex(hex); commit(); });
+      recentEl.appendChild(chip);
+    }
+    recentEl.style.display = r.length ? "flex" : "none";
+  }
+
+  function build() {
+    el = document.createElement("div");
+    el.id = "picker";
+    el.hidden = true;
+    el.innerHTML = `
+      <div class="pk-sv"><div class="pk-thumb"></div></div>
+      <div class="pk-hue"><div class="pk-thumb"></div></div>
+      <div class="pk-row">
+        <span class="pk-preview"></span>
+        <input class="pk-hex" spellcheck="false" maxlength="7">
+        <button class="pk-eyedrop" title="Pick a color from the screen" hidden>
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m2 22 1-4 9.5-9.5 3 3L6 21z"/><path d="m14.5 5.5 1.9-1.9a2.12 2.12 0 0 1 3 3L17.5 8.5"/><path d="m13 7 4 4"/>
+          </svg>
+        </button>
+      </div>
+      <div class="pk-recent"></div>
+    `;
+    document.body.appendChild(el);
+    svEl = el.querySelector(".pk-sv");
+    svThumb = svEl.querySelector(".pk-thumb");
+    hueEl = el.querySelector(".pk-hue");
+    hueThumb = hueEl.querySelector(".pk-thumb");
+    hexInput = el.querySelector(".pk-hex");
+    previewEl = el.querySelector(".pk-preview");
+    recentEl = el.querySelector(".pk-recent");
+    const eyeBtn = el.querySelector(".pk-eyedrop");
+
+    // saturation/value square
+    svEl.addEventListener("pointerdown", (e) => {
+      try { svEl.setPointerCapture(e.pointerId); } catch (err) {}
+      const move = (ev) => {
+        const r = svEl.getBoundingClientRect();
+        s = clamp((ev.clientX - r.left) / r.width, 0, 1);
+        v = 1 - clamp((ev.clientY - r.top) / r.height, 0, 1);
+        commit();
+      };
+      const up = () => {
+        svEl.removeEventListener("pointermove", move);
+        svEl.removeEventListener("pointerup", up);
+      };
+      svEl.addEventListener("pointermove", move);
+      svEl.addEventListener("pointerup", up);
+      move(e);
+    });
+
+    // hue slider
+    hueEl.addEventListener("pointerdown", (e) => {
+      try { hueEl.setPointerCapture(e.pointerId); } catch (err) {}
+      const move = (ev) => {
+        const r = hueEl.getBoundingClientRect();
+        h = clamp((ev.clientX - r.left) / r.width, 0, 1) * 360;
+        if (h >= 360) h = 359.9;
+        commit();
+      };
+      const up = () => {
+        hueEl.removeEventListener("pointermove", move);
+        hueEl.removeEventListener("pointerup", up);
+      };
+      hueEl.addEventListener("pointermove", move);
+      hueEl.addEventListener("pointerup", up);
+      move(e);
+    });
+
+    // hex typing
+    hexInput.addEventListener("input", () => {
+      const hex = normalizeHex(hexInput.value);
+      hexInput.classList.toggle("invalid", !hex);
+      if (!hex) return;
+      setFromHex(hex);
+      commit(true);
+    });
+
+    // eyedropper (Chrome/Edge)
+    if (window.EyeDropper) {
+      eyeBtn.hidden = false;
+      eyeBtn.addEventListener("click", async () => {
+        try {
+          const res = await new EyeDropper().open();
+          const hex = normalizeHex(res.sRGBHex);
+          if (hex) { setFromHex(hex); commit(); }
+        } catch (e) { /* user cancelled */ }
+      });
+    }
+
+    // close on outside click / Esc (clicking a swatch closes here, then its
+    // click handler reopens — so double-clicks can't leave the picker closed)
+    document.addEventListener("pointerdown", (e) => {
+      if (el.hidden) return;
+      if (el.contains(e.target)) return;
+      close();
+    }, true);
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape") close(); });
+  }
+
+  function setFromHex(hex) {
+    const [r, g, b] = hexToRgb(hex);
+    const [nh, ns, nv] = rgbToHsv(r, g, b);
+    // keep the current hue for grays so the slider doesn't jump to red
+    if (ns > 0 && nv > 0) h = nh;
+    s = ns; v = nv;
+  }
+
+  function currentHex() { return hsvToHex(h, s, v); }
+
+  function commit(skipHexField) {
+    const hex = currentHex();
+    svEl.style.background =
+      `linear-gradient(to top, #000, rgba(0,0,0,0)), linear-gradient(to right, #fff, ${hsvToHex(h, 1, 1)})`;
+    svThumb.style.left = (s * 100) + "%";
+    svThumb.style.top = ((1 - v) * 100) + "%";
+    hueThumb.style.left = (h / 360 * 100) + "%";
+    previewEl.style.background = hex;
+    if (!skipHexField) { hexInput.value = hex; hexInput.classList.remove("invalid"); }
+    if (onChange) onChange(hex);
+  }
+
+  function open(anchorEl, hex, cb) {
+    anchor = anchorEl;
+    onChange = null;            // don't fire while restoring position
+    setFromHex(hex);
+    commit();
+    onChange = cb;
+    renderRecent();
+
+    el.hidden = false;
+    const r = anchorEl.getBoundingClientRect();
+    const pw = el.offsetWidth, ph = el.offsetHeight;
+    let x = r.right + 10, y = r.top - 8;
+    if (x + pw > innerWidth - 8) x = Math.max(8, r.left - pw - 10);
+    y = clamp(y, 8, innerHeight - ph - 8);
+    el.style.left = x + "px";
+    el.style.top = y + "px";
+  }
+
+  function close() {
+    if (el.hidden) return;
+    pushRecent(currentHex());
+    el.hidden = true;
+    anchor = null;
+    onChange = null;
+  }
+
+  build();
+  return { open, close, isOpen: () => !el.hidden };
+})();
+
+/* ================= Controls UI ================= */
+
+function colorRow(w) {
+  const row = document.createElement("div");
+  row.className = "color-row";
+  row.innerHTML = `
+    <label title="${w.key}">${w.label}</label>
+    <button class="swatch" data-key="${w.key}" title="${w.key}">
+      <span class="chip"></span><span class="hex"></span>
+    </button>
+  `;
+  return row;
+}
+
+function tokenRow(t) {
+  const row = document.createElement("div");
+  row.className = "color-row";
+  row.innerHTML = `
+    <label title="${t.scopes.join(", ")}">${t.label}</label>
+    <div class="style-toggles">
+      <button class="bold-btn" data-kind="tok-bold" data-id="${t.id}" title="Bold">B</button>
+      <button class="italic-btn" data-kind="tok-italic" data-id="${t.id}" title="Italic">I</button>
+    </div>
+    <button class="swatch" data-token="${t.id}" title="${t.scopes.join(", ")}">
+      <span class="chip"></span><span class="hex"></span>
+    </button>
+  `;
+  return row;
+}
+
+function buildControls() {
+  // Interface tab: one-at-a-time accordion of workbench groups
+  const paneUi = $("#pane-ui");
+  const groups = [];
+  for (const w of WORKBENCH) if (!groups.includes(w.group)) groups.push(w.group);
+
+  for (const g of groups) {
+    const keys = WORKBENCH.filter(x => x.group === g);
+    const det = document.createElement("details");
+    det.setAttribute("name", "wb-acc");           // native exclusive accordion
+    det.open = (g === "Editor");
+    const dots = keys.slice(0, 5).map(w => `<span data-dotkey="${w.key}"></span>`).join("");
+    det.innerHTML = `<summary>${g}<span class="dots">${dots}</span></summary>`;
+    const body = document.createElement("div");
+    body.className = "section-body";
+    for (const w of keys) body.appendChild(colorRow(w));
+    det.appendChild(body);
+    paneUi.appendChild(det);
+  }
+
+  // Code tab: flat list of token rows
+  const paneCode = $("#pane-code");
+  for (const t of TOKENS) paneCode.appendChild(tokenRow(t));
+}
+
+function syncControls() {
+  document.querySelectorAll(".swatch").forEach(sw => {
+    const hex = sw.dataset.key ? state.colors[sw.dataset.key] : state.tokens[sw.dataset.token].color;
+    sw.querySelector(".chip").style.background = hex;
+    sw.querySelector(".hex").textContent = hex;
+  });
+  document.querySelectorAll("[data-dotkey]").forEach(d => d.style.background = state.colors[d.dataset.dotkey]);
+  document.querySelectorAll('[data-kind="tok-bold"]').forEach(el => el.classList.toggle("on", state.tokens[el.dataset.id].bold));
+  document.querySelectorAll('[data-kind="tok-italic"]').forEach(el => el.classList.toggle("on", state.tokens[el.dataset.id].italic));
+}
+
+function wireControls() {
+  const container = $("#controls");
+
+  container.addEventListener("click", (e) => {
+    const sw = e.target.closest(".swatch");
+    if (sw) {
+      const key = sw.dataset.key, tok = sw.dataset.token;
+      const cur = key ? state.colors[key] : state.tokens[tok].color;
+      Picker.open(sw, cur, (hex) => {
+        if (key) state.colors[key] = hex;
+        else state.tokens[tok].color = hex;
+        applyState();
+        syncControls();
+      });
+      return;
+    }
+    const btn = e.target.closest("button");
+    if (!btn || !btn.dataset.kind) return;
+    if (btn.dataset.kind === "tok-bold") {
+      state.tokens[btn.dataset.id].bold = !state.tokens[btn.dataset.id].bold;
+    } else if (btn.dataset.kind === "tok-italic") {
+      state.tokens[btn.dataset.id].italic = !state.tokens[btn.dataset.id].italic;
+    } else return;
+    applyState();
+    syncControls();
+  });
+
+  // reposition/close situations: scrolling a pane or switching tabs
+  document.querySelectorAll(".tabpane").forEach(p => p.addEventListener("scroll", () => Picker.close()));
+
+  $("#tabbar").addEventListener("click", (e) => {
+    const tab = e.target.closest(".tab");
+    if (!tab) return;
+    Picker.close();
+    document.querySelectorAll("#tabbar .tab").forEach(t => t.classList.toggle("active", t === tab));
+    document.querySelectorAll(".tabpane").forEach(p => p.classList.add("hidden"));
+    $("#pane-" + tab.dataset.tab).classList.remove("hidden");
+  });
+}
+
+/* ================= Preview markup ================= */
+
+function tokenCss() {
+  const style = document.createElement("style");
+  style.textContent = TOKENS.map(t =>
+    `.tok-${t.id}{color:var(--tok-${t.id});font-style:var(--tok-${t.id}-fs,normal);font-weight:var(--tok-${t.id}-fw,normal);}`
+  ).join("\n");
+  document.head.appendChild(style);
+}
+
+function buildPreview() {
+  const tk = (id, text) => `<span class="tok-${id}">${text}</span>`;
+  const lines = [
+    tk("comment", "// Fetch a user profile from the REST API"),
+    `${tk("ctrl", "import")} { ${tk("variable", "httpClient")} } ${tk("ctrl", "from")} ${tk("string", "&quot;./client&quot;")};`,
+    ``,
+    `${tk("keyword", "const")} ${tk("variable", "MAX_RETRIES")} ${tk("op", "=")} ${tk("number", "3")};`,
+    ``,
+    `${tk("keyword", "async function")} ${tk("func", "fetchUser")}(${tk("variable", "userId")}) {`,
+    `  ${tk("keyword", "let")} ${tk("variable", "attempts")} ${tk("op", "=")} ${tk("number", "0")};`,
+    `  ${tk("ctrl", "while")} (${tk("variable", "attempts")} ${tk("op", "&lt;")} ${tk("variable", "MAX_RETRIES")}) {`,
+    `    ${tk("ctrl", "try")} {`,
+    `      ${tk("keyword", "const")} ${tk("variable", "res")} ${tk("op", "=")} ${tk("ctrl", "await")} ${tk("variable", "httpClient")}.${tk("func", "get")}(${tk("string", "\`/users/\${")}${tk("variable", "userId")}${tk("string", "}\`")});`,
+    `      ${tk("ctrl", "return")} <span class="sel">${tk("variable", "res")}.${tk("prop", "data")}</span>;<span class="cursor"></span>`,
+    `    } ${tk("ctrl", "catch")} (${tk("variable", "err")}) {`,
+    `      ${tk("variable", "attempts")} ${tk("op", "+=")} ${tk("number", "1")};`,
+    `    }`,
+    `  }`,
+    `  ${tk("ctrl", "return")} ${tk("const", "null")};`,
+    `}`,
+    ``,
+    `${tk("keyword", "class")} ${tk("type", "UserService")} {`,
+    `  ${tk("prop", "ready")} ${tk("op", "=")} ${tk("const", "true")};`,
+    `}`,
+  ];
+  const ACTIVE_LINE = 11;
+  const codeHtml = lines.map((l, i) =>
+    `<div class="cl${i + 1 === ACTIVE_LINE ? " active" : ""}"><span class="ln">${i + 1}</span><span class="ct">${l || " "}</span></div>`
+  ).join("");
+
+  const icon = (path, opts = "") => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" ${opts}>${path}</svg>`;
+  const icons = {
+    files: icon('<rect x="6" y="3" width="11" height="14" rx="1"/><path d="M6 7H4.5A1.5 1.5 0 0 0 3 8.5V19a2 2 0 0 0 2 2h8a1.5 1.5 0 0 0 1.5-1.5V17"/>'),
+    search: icon('<circle cx="10.5" cy="10.5" r="6"/><path d="m15 15 5.5 5.5"/>'),
+    scm: icon('<circle cx="7" cy="6" r="2.4"/><circle cx="7" cy="18" r="2.4"/><circle cx="17" cy="8" r="2.4"/><path d="M7 8.4v7.2M17 10.4c0 4-10 2.6-10 5.2"/>'),
+    debug: icon('<path d="M8 5v14l11-7z"/><circle cx="8" cy="12" r="3.4"/>'),
+    ext: icon('<rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/>'),
+    account: icon('<circle cx="12" cy="9" r="3.6"/><path d="M5 20a8 8 0 0 1 14 0"/><circle cx="12" cy="12" r="9.4"/>'),
+    gear: icon('<circle cx="12" cy="12" r="3.2"/><path d="M12 2.8v3M12 18.2v3M2.8 12h3M18.2 12h3M5.5 5.5l2.1 2.1M16.4 16.4l2.1 2.1M18.5 5.5l-2.1 2.1M7.6 16.4l-2.1 2.1"/>'),
+  };
+
+  $("#preview").innerHTML = `
+    <div class="pv-titlebar">
+      <div class="pv-menus"><span>File</span><span>Edit</span><span>Selection</span><span>View</span><span>Go</span><span>Run</span><span>Help</span></div>
+      <div class="pv-title">userService.js — sample-project — Visual Studio Code</div>
+      <div class="pv-winbtns"><span>—</span><span>▢</span><span>✕</span></div>
+    </div>
+    <div class="pv-body">
+      <div class="pv-activitybar">
+        <div class="icon active">${icons.files}</div>
+        <div class="icon">${icons.search}</div>
+        <div class="icon">${icons.scm}<span class="pv-badge">2</span></div>
+        <div class="icon">${icons.debug}</div>
+        <div class="icon">${icons.ext}</div>
+        <div class="grow"></div>
+        <div class="icon">${icons.account}</div>
+        <div class="icon">${icons.gear}</div>
+      </div>
+      <div class="pv-sidebar">
+        <div class="sb-title">EXPLORER</div>
+        <div class="sb-section">▾ SAMPLE-PROJECT</div>
+        <div class="pv-tree">
+          <div class="folder">▸ node_modules</div>
+          <div class="folder">▾ src</div>
+          <div>app.css</div>
+          <div>index.js</div>
+          <div class="selected">userService.js</div>
+          <div class="folder" style="padding-left:12px">package.json</div>
+          <div class="folder" style="padding-left:12px">README.md</div>
+        </div>
+      </div>
+      <div class="pv-editor-col">
+        <div class="pv-tabs">
+          <div class="pv-tab active"><span class="dot">●</span> userService.js</div>
+          <div class="pv-tab inactive">app.css</div>
+        </div>
+        <div class="pv-code">${codeHtml}</div>
+        <div class="pv-panel">
+          <div class="panel-tabs"><span class="off">PROBLEMS</span><span class="off">OUTPUT</span><span class="on">TERMINAL</span></div>
+          <div class="pv-term">➜ sample-project git:(main) npm run dev
+  ▸ dev server ready in 320 ms</div>
+        </div>
+      </div>
+    </div>
+    <div class="pv-statusbar">
+      <span>⎇ main</span>
+      <span>⊗ 0  ⚠ 0</span>
+      <span class="grow"></span>
+      <span>Ln 11, Col 17</span>
+      <span>Spaces: 2</span>
+      <span>UTF-8</span>
+      <span>LF</span>
+      <span>JavaScript</span>
+      <span>🔔</span>
+    </div>
+  `;
+}
+
+/* ================= Actions ================= */
+
+function resetToDefaults() {
+  Picker.close();
+  state = defaultState();
+  syncControls();
+  applyState();
+  showToast("Reset to Dark+ defaults");
+}
+
+function randomizePalette() {
+  Picker.close();
+  const rand = (a, b) => a + Math.random() * (b - a);
+  const h = Math.floor(rand(0, 360));
+  const h2 = (h + 150 + Math.floor(rand(0, 60))) % 360;   // accent hue
+  const bgSat = rand(8, 22);
+
+  const c = state.colors;
+  c["editor.background"]                 = hslToHex(h, bgSat, 10);
+  c["editor.foreground"]                 = hslToHex(h, 12, 86);
+  c["editor.lineHighlightBackground"]    = hslToHex(h, bgSat, 15);
+  c["editor.selectionBackground"]        = hslToHex(h2, 45, 26);
+  c["editorCursor.foreground"]           = hslToHex(h2, 70, 65);
+  c["editorLineNumber.foreground"]       = hslToHex(h, 10, 38);
+  c["editorLineNumber.activeForeground"] = hslToHex(h, 10, 70);
+  c["titleBar.activeBackground"]         = hslToHex(h, bgSat, 17);
+  c["titleBar.activeForeground"]         = hslToHex(h, 10, 80);
+  c["activityBar.background"]            = hslToHex(h, bgSat, 14);
+  c["activityBar.foreground"]            = hslToHex(h, 10, 92);
+  c["activityBarBadge.background"]       = hslToHex(h2, 65, 45);
+  c["sideBar.background"]                = hslToHex(h, bgSat, 12);
+  c["sideBar.foreground"]                = hslToHex(h, 10, 78);
+  c["list.activeSelectionBackground"]    = hslToHex(h2, 50, 24);
+  c["list.activeSelectionForeground"]    = hslToHex(0, 0, 100);
+  c["editorGroupHeader.tabsBackground"]  = hslToHex(h, bgSat, 12);
+  c["tab.activeBackground"]              = c["editor.background"];
+  c["tab.activeForeground"]              = hslToHex(0, 0, 100);
+  c["tab.inactiveBackground"]            = hslToHex(h, bgSat, 15);
+  c["tab.inactiveForeground"]            = hslToHex(h, 8, 60);
+  c["statusBar.background"]              = hslToHex(h2, 60, 38);
+  c["statusBar.foreground"]              = hslToHex(0, 0, 100);
+  c["panel.background"]                  = hslToHex(h, bgSat, 10);
+  c["terminal.foreground"]               = hslToHex(h, 10, 80);
+
+  // Spread token hues around the wheel, keep them bright enough to read on dark bg
+  const offsets = { keyword: 0, ctrl: 40, func: 75, string: 110, number: 145, type: 180, variable: 215, prop: 240, const: 300, op: 0 };
+  for (const t of TOKENS) {
+    if (t.id === "comment") { state.tokens[t.id].color = hslToHex((h + 90) % 360, 22, 52); continue; }
+    if (t.id === "op")      { state.tokens[t.id].color = hslToHex(h, 10, 80); continue; }
+    state.tokens[t.id].color = hslToHex((h2 + offsets[t.id]) % 360, rand(55, 75), rand(65, 76));
+  }
+
+  syncControls();
+  applyState();
+  showToast("Palette randomized 🎲");
+}
+
+async function copyJson() {
+  const text = JSON.stringify(buildOutput($("#chk-all").checked), null, 2);
+  try {
+    await navigator.clipboard.writeText(text);
+    showToast("Copied to clipboard ✓");
+  } catch (e) {
+    // fallback for contexts where the clipboard API is blocked
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    try {
+      document.execCommand("copy");
+      showToast("Copied to clipboard ✓");
+    } catch (e2) {
+      showToast("Copy failed — select the JSON manually");
+    }
+    ta.remove();
+  }
+}
+
+/* ================= Import ================= */
+
+// Strip // and /* */ comments plus trailing commas so settings.json (JSONC) parses
+function stripJsonc(text) {
+  let out = "";
+  let inStr = false, inLine = false, inBlock = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i], next = text[i + 1];
+    if (inLine)  { if (ch === "\n") { inLine = false; out += ch; } continue; }
+    if (inBlock) { if (ch === "*" && next === "/") { inBlock = false; i++; } continue; }
+    if (inStr) {
+      out += ch;
+      if (ch === "\\") { out += next ?? ""; i++; }
+      else if (ch === '"') inStr = false;
+      continue;
+    }
+    if (ch === '"') { inStr = true; out += ch; continue; }
+    if (ch === "/" && next === "/") { inLine = true; continue; }
+    if (ch === "/" && next === "*") { inBlock = true; i++; continue; }
+    out += ch;
+  }
+  return out.replace(/,(\s*[}\]])/g, "$1");
+}
+
+function importSettings(text) {
+  let obj;
+  try {
+    obj = JSON.parse(stripJsonc(text));
+  } catch (e) {
+    throw new Error("Couldn't parse that as JSON: " + e.message);
+  }
+  if (typeof obj !== "object" || obj === null || Array.isArray(obj)) {
+    throw new Error("Expected a JSON object.");
+  }
+
+  let applied = 0;
+  const knownKeys = new Set(WORKBENCH.map(w => w.key));
+
+  const applyWorkbench = (map) => {
+    for (const [k, v] of Object.entries(map)) {
+      if (k.startsWith("[") && typeof v === "object" && v) { applyWorkbench(v); continue; } // theme-scoped
+      if (knownKeys.has(k)) {
+        const hex = normalizeHex(v);
+        if (hex) { state.colors[k] = hex; applied++; }
+      }
+    }
+  };
+
+  const applyTokens = (tc) => {
+    for (const [k, v] of Object.entries(tc)) {
+      if (k.startsWith("[") && typeof v === "object" && v) { applyTokens(v); continue; }   // theme-scoped
+      if (k in SHORTHAND_MAP) {
+        const raw = typeof v === "string" ? v : (v && v.foreground);
+        const hex = normalizeHex(raw);
+        if (hex) { state.tokens[SHORTHAND_MAP[k]].color = hex; applied++; }
+      }
+    }
+    const rules = tc.textMateRules;
+    if (!Array.isArray(rules)) return;
+    for (const rule of rules) {
+      if (!rule || typeof rule !== "object" || !rule.settings) continue;
+      const scopes = Array.isArray(rule.scope) ? rule.scope
+                   : typeof rule.scope === "string" ? rule.scope.split(",").map(s => s.trim())
+                   : [];
+      for (const t of TOKENS) {
+        if (!scopes.some(s => t.scopes.includes(s))) continue;
+        const hex = normalizeHex(rule.settings.foreground);
+        if (hex) { state.tokens[t.id].color = hex; applied++; }
+        if (typeof rule.settings.fontStyle === "string") {
+          state.tokens[t.id].italic = rule.settings.fontStyle.includes("italic");
+          state.tokens[t.id].bold = rule.settings.fontStyle.includes("bold");
+        }
+      }
+    }
+  };
+
+  if (obj["workbench.colorCustomizations"]) applyWorkbench(obj["workbench.colorCustomizations"]);
+  if (obj["editor.tokenColorCustomizations"]) applyTokens(obj["editor.tokenColorCustomizations"]);
+  // Also accept a bare workbench map or bare token customizations object
+  if (!obj["workbench.colorCustomizations"] && !obj["editor.tokenColorCustomizations"]) {
+    applyWorkbench(obj);
+    applyTokens(obj);
+  }
+
+  if (!applied) throw new Error("No recognized color keys found in that JSON.");
+  return applied;
+}
+
+/* ================= Presets ================= */
+
+function loadPresets() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_PRESETS)) || {}; }
+  catch (e) { return {}; }
+}
+
+function savePresets(presets) {
+  try { localStorage.setItem(STORAGE_PRESETS, JSON.stringify(presets)); } catch (e) {}
+}
+
+function renderPresetList() {
+  const presets = loadPresets();
+  const list = $("#preset-list");
+  const names = Object.keys(presets).sort();
+  if (!names.length) {
+    list.innerHTML = '<div class="preset-empty">No saved presets yet.</div>';
+    return;
+  }
+  list.innerHTML = "";
+  for (const name of names) {
+    const item = document.createElement("div");
+    item.className = "preset-item";
+    const nameEl = document.createElement("span");
+    nameEl.className = "name";
+    nameEl.textContent = name;
+    const loadBtn = document.createElement("button");
+    loadBtn.className = "small";
+    loadBtn.textContent = "Load";
+    loadBtn.addEventListener("click", () => {
+      const p = loadPresets()[name];
+      if (!p) return;
+      state = defaultState();
+      Object.assign(state.colors, p.colors || {});
+      for (const [id, tok] of Object.entries(p.tokens || {})) {
+        if (state.tokens[id]) Object.assign(state.tokens[id], tok);
+      }
+      syncControls();
+      applyState();
+      showToast(`Loaded “${name}”`);
+    });
+    const delBtn = document.createElement("button");
+    delBtn.className = "small danger";
+    delBtn.textContent = "✕";
+    delBtn.title = "Delete preset";
+    delBtn.addEventListener("click", () => {
+      const presets = loadPresets();
+      delete presets[name];
+      savePresets(presets);
+      renderPresetList();
+      showToast(`Deleted “${name}”`);
+    });
+    item.append(nameEl, loadBtn, delBtn);
+    list.appendChild(item);
+  }
+}
+
+/* ================= Wire up ================= */
+
+function init() {
+  tokenCss();
+  buildPreview();
+  buildControls();
+  wireControls();
+
+  // restore autosaved working state
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_CURRENT));
+    if (saved && saved.colors && saved.tokens) {
+      const fresh = defaultState();
+      Object.assign(fresh.colors, saved.colors);
+      for (const [id, tok] of Object.entries(saved.tokens)) {
+        if (fresh.tokens[id]) Object.assign(fresh.tokens[id], tok);
+      }
+      state = fresh;
+    }
+  } catch (e) {}
+
+  syncControls();
+  applyState();
+  renderPresetList();
+
+  $("#btn-reset").addEventListener("click", resetToDefaults);
+  $("#btn-random").addEventListener("click", randomizePalette);
+  $("#btn-copy").addEventListener("click", copyJson);
+  $("#chk-all").addEventListener("change", renderJson);
+
+  $("#btn-save-preset").addEventListener("click", () => {
+    const name = $("#preset-name").value.trim();
+    if (!name) { showToast("Give the preset a name first"); return; }
+    const presets = loadPresets();
+    presets[name] = JSON.parse(JSON.stringify({ colors: state.colors, tokens: state.tokens }));
+    savePresets(presets);
+    renderPresetList();
+    $("#preset-name").value = "";
+    showToast(`Saved “${name}”`);
+  });
+
+  const dialog = $("#import-dialog");
+  $("#btn-import").addEventListener("click", () => {
+    Picker.close();
+    $("#import-error").textContent = "";
+    $("#import-text").value = "";
+    dialog.showModal();
+  });
+  $("#btn-import-cancel").addEventListener("click", () => dialog.close());
+  $("#btn-import-apply").addEventListener("click", () => {
+    try {
+      const n = importSettings($("#import-text").value);
+      syncControls();
+      applyState();
+      dialog.close();
+      showToast(`Imported ${n} color${n === 1 ? "" : "s"} ✓`);
+    } catch (e) {
+      $("#import-error").textContent = e.message;
+    }
+  });
+}
+
+init();
+</script>
+</body>
+</html>
